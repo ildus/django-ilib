@@ -1,0 +1,90 @@
+.tagbox {
+	border: 1px solid #aaa;
+	min-width: 100px;
+	min-height: 20px;
+	display: inline-block;
+	padding: 1px 30px 1px 5px;
+	cursor: text;
+	margin-top: 10px;
+}
+
+.tagbox * {
+	margin: 0;
+	padding: 0;
+	outline: none;
+}
+
+span.tag{
+	float: left;
+	font-family: "Lucida Grande","Verdana";
+}
+span.tag label {
+	background: #eee;
+/*	border: 1px solid transparent;*/
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	margin: 3px 0 3px 5px;
+	padding:1px 21px 1px 1px;
+	position: relative;
+	display: inline-block;
+	min-width: 20px;
+	height: 20px;
+	width: auto;
+}
+span.tag small {
+	color: #222;
+	border: none;
+	font-size: 8px;
+	font-weight: bold;
+	line-height: 12px;
+	position: absolute;
+	right: 3px;
+	bottom:0;
+	z-index: 199;
+	height: 100%;
+	line-height: 22px;
+	cursor: pointer;
+}
+span.tag input {
+	border: none;
+	background: transparent;
+	color: #222;
+	position: absolute;
+	top: 3px;
+	left:0;
+	height: 15px;
+	z-index: 0;
+	/*line-height: 20px;*/
+	text-align: center;
+	padding: 0;
+	width: 100%;
+	_width:expression(this.parentNode.offsetWidth);
+}
+span.tag input, span.tag label span {
+	font-family: "Lucida Grande","Verdana";
+	font-size: 11px;
+}
+span.tag label span {
+	display: inline-block;
+	visibility: hidden;
+	margin-left: 5px;
+
+}
+#tagbox_autocomplete_sugestions {
+	-webkit-border-radius: 0 5px 5px 5px;
+	-moz-border-radius: 0 5px 5px 5px;
+	border-radius:  0 5px 5px 5px;
+	background:#fff;
+	border:1px solid #656696;
+	padding:5px 17px;
+	opacity: 0.9;
+	-moz-opacity: 0.9;
+	filter:alpha(opacity=90);
+	font-family: "Lucida Grande","Verdana";
+	font-size:11px;
+}
+#tagbox_autocomplete_sugestions ul {
+	padding-left:0;
+	list-style:none;
+}

@@ -1,0 +1,21 @@
+<div class="fk-editing">
+	{{hidden_field}}
+	
+	<div class='fk-name-field ' id='fk-name-{{ name }}'>
+		{{ value }}		
+	</div>
+	{% if change_url %}
+	<a onclick="return showAddAnotherPopup(this);" id="view_id_{{name}}" class="add-another" 
+		href="{{change_url}}"> 
+			<img width="16" height="16" alt="Просмотреть" src="{{ media }}lib/img/window.png"></a>
+	{% endif %}
+	<!-- 
+		 link - откуда загружается контент всплывающего окна - должны быть прописаны в urls.py чтобы работало
+	 -->
+	<a onclick="return showListDialog(this);" 
+		id="select_id_{{name}}" class="add-another"
+		field_name="{{field_name}}"
+		href="javascript: void(0)"
+		link="{% url fk_listselect content_type_id field_name %}">
+			<img width="10" height="10" alt="Выбрать" src="{{ media }}lib/img/external.gif"></a>
+</div>

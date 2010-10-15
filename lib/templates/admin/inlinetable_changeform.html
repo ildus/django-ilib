@@ -1,0 +1,59 @@
+{% extends "admin/change_form.html" %}
+{% block after_field_sets %}
+    {% if not is_popup and object_id %}
+        <script type="text/javascript">
+            function inline_delete(link) {
+                if (confirm("Are you sure?")) {
+                    href = link.href
+                    django.jQuery.ajax({
+                        'url': href,
+                        'success': function (data) {
+                            if (data == 'ok') reload_inlinetables();
+                        }
+                    });
+                }
+                return false;
+            }
+
+            function add_param(params, param) {
+            	p = param.split('=');
+				params[p[0]] = p[1]
+            }
+        
+            function reload_inlinetables(field_name) {
+                django.jQuery('.inline_table').each(function (i, fs) {
+					var params = {}
+					if (field_name != undefined) {
+						s = 'select[fname="'+field_name+'"]';
+						param = django.jQuery('.inline_filter '+s+' option[selected]', fs).val();
+						if (param != '?') { 
+							param = param.replace('?', '')
+							if (param.indexOf('&') != -1) {
+								many_params = param.split('&');
+								for (k in many_params) add_param(params, many_params[k]);
+							}
+							else add_param(params, param);
+						}
+					}
+					url = '../get_table/'+i+'/{{object_id}}/';
+
+					query_string = '?';
+					for (key in params) query_string += key+'='+params[key]+'&';
+					if (query_string.length > 1) url += query_string;
+
+					django.jQuery(fs).empty();
+										
+                    django.jQuery(fs).load(url, function() {
+                    	django.jQuery('.inline_filter select').unbind('change').change(function () {
+                    		reload_inlinetables($(this).attr('fname'));
+                    	});                            	
+                    });
+                });
+            }
+            
+            django.jQuery(document).ready(function () {
+                reload_inlinetables();
+            });
+        </script>
+    {% endif %}
+{% endblock %}

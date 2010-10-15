@@ -1,0 +1,61 @@
+{% load paginator_tags %}
+<style type="text/css">
+	div.searchers-block {
+		border-bottom: 1px solid #ccc;
+		padding-bottom: 10px;
+		margin-bottom: 10px;
+	}
+	
+	div.searchers a, div.searchers b {
+		margin-right: 5px;
+	}
+	
+	div.objects div.object {
+		display: block;
+		text-align: left;
+		padding: 3px;
+	}
+	
+	div.objects div.object a {
+		display: block;
+		font-weight: bold;
+		
+	}
+	
+	div.objects div.object a:hover {
+		color: red;
+	}
+	
+	div.objects .col1 {
+		background-color: #f5f5f5;
+	}
+	
+	div.fk_list_select div.pagination {
+		border-top: 1px solid #ccc;
+		margin-top: 10px;
+		padding: 10px 0;
+	}
+</style>
+
+<div class="fk_list_select">
+	{% if title_field %}
+	<div class='searchers-block'>
+        <div class='searchers'>
+            <span  class='ui-corner-all'><a href='?' class='char selected'>Все</a></span>
+            <span  class='ui-corner-all'>{{ rus }}</span>
+        </div>
+        <div class='searchers' style='margin-top:10px;'>
+            <span class='ui-corner-all'>{{ digits }}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class='ui-corner-all'>{{ en }}</span>
+        </div>
+    </div>
+    {% endif %}
+    <div class="objects">
+    	{% for one in objects.object_list %}
+    	<div class="object {% cycle 'col1' 'col2' %}">
+    		<a href="javascript: void(0)" onclick="return onListSelect(this, '{{one.pk}}', '{{field_name}}');"> {{one}} </a>
+    	</div>
+    	{% endfor %}
+    </div>
+    {% paginator %}
+</div>

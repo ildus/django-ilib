@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="inline_filter">
+	<b> {{title|capfirst}}</b>&nbsp;
+	<select fname="{{spec.field.name}}">
+	{% for choice in choices %}
+	    <option value="{{ choice.query_string|iriencode }}" {% if choice.selected %} selected {% endif %}> {{ choice.display }}
+	    </option>
+	{% endfor %}
+	</select>
+</div>

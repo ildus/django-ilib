@@ -1,0 +1,21 @@
+<div class="fk-editing">
+	{{hidden_field}}
+	
+	<div class='fk-name-field ' id='fk-name-{{ name }}'>
+		{{ value }}		
+	</div>
+	{% if change_url %}
+	<a onclick="return showAddAnotherPopup(this);" id="view_id_{{name}}" class="add-another" 
+		href="{{change_url}}"> 
+			<img width="16" height="16" alt="Просмотреть" src="{{ media }}lib/img/window.png"></a>
+	{% endif %}
+	<!-- target - откуда загружаются данные для node,
+		 link - откуда загружается контент всплывающего окна - должны быть прописаны в urls.py чтобы работало
+	 -->
+	<a onclick="return showTreeDialog(this);" 
+		id="select_id_{{name}}" class="add-another"
+		href="javascript: void(0)"
+		target="{% url fk_field_data content_type_id field_name %}"
+		link="{% url fk_select %}">
+			<img width="10" height="10" alt="Выбрать" src="{{ media }}lib/img/external.gif"></a>
+</div>

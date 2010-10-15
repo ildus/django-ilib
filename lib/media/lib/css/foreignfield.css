@@ -1,0 +1,20 @@
+div.fk-editing {
+	display: inline-block;
+	border: 1px solid #ccc;
+}
+
+div.fk-name-field {
+	
+	display: inline-block;
+	min-width: 250px;
+	_width: 250px;
+	height: 20px;
+	padding: 4px 3px 0 5px;
+}
+
+div.fk-editing + a.add-another,  div.fk-editing a {
+	vertical-align: top;
+	margin: 4px 0px 4px 5px;
+	display: inline-block;
+	width: 20px;
+}

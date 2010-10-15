@@ -1,0 +1,92 @@
+{% load i18n lib_tags admin_list %}
+<h2>{{table.caption|capfirst}} </h2>
+
+<style type="text/css">
+        table.inline_objects {
+            margin: 10px;
+        }
+    
+        table.inline_objects td, table.inline_objects th {
+            padding: 5px 20px 5px 5px;
+            border: 1px solid #eee !important;
+        }
+        
+        table.inline_objects td:last-child {
+            text-align: center;
+        }
+        
+        div.inline_filter {
+        	color: #666;
+        	display: inline-block;
+        	margin-left: 10px;
+        	padding: 5px 0;
+        }
+        
+        div.no_objects {
+        	margin: 10px;
+        }
+</style>
+    
+{% if cl.has_filters %}
+  <div id="changelist-filter">
+    {% for spec in cl.filter_specs %}{% lib_list_filter cl spec %}{% endfor %}
+  </div>
+{% endif %}
+
+{% if table.has_data %}
+    
+    <table class="inline_objects">
+    {% if table.header %}
+    <thead> 
+        <tr>
+            {% for one in table.header %} <th> {{one|capfirst}} </th> {% endfor %}
+            <th class="actions"> {% trans 'actions'|capfirst %} </th>
+        </tr>
+    </thead>
+    {% endif %}
+    {% if table.body %}
+    <tbody>
+        {% for row in table.body %}
+        <tr class="{% cycle 'row2' 'row1' %}">
+            {% for cell in row %}  <td> {{cell}} </td> {% endfor %}
+        </tr> 
+        {% endfor %}
+    </tbody>
+    {% endif %}
+    {% if table.footer %}
+    <tfoot> 
+        <tr>
+            {% for one in table.footer %} <td> {{one}} </td> {% endfor %}
+            <td> </td>
+        </tr>
+    </tfoot>
+    {% endif %}
+    </table>
+{% else %}
+	<div class="no_objects">
+		{% if cl.has_filters %} 
+			{% trans "No results" %}
+		{% else %}
+			{% trans "No objects" %}
+		{% endif %} 
+	</div>
+{% endif %}
+<div class="button_add_item" style="margin: 20px 10px">
+    <script type="text/javascript">
+        dismissAddAnotherPopup_orig = dismissAddAnotherPopup;
+        
+        function add_link(link) {
+            showAddAnotherPopup(link);
+            dismissAddAnotherPopup = function (win, newId, newRepr) {
+                reload_inlinetables();
+                win.close();
+                dismissAddAnotherPopup = dismissAddAnotherPopup_orig;
+            }
+            return false;
+        }
+    </script>
+    <a href="{{table.add_link}}" class="add-another add_link" onclick="return add_link(this);"> 
+        <img src="/media/admin/img/admin/icon_addlink.gif" width="10" height="10" alt="Добавить еще"> 
+        {% trans 'Add' %} {{table.caption_one_item}}
+    </a>
+ </div>
