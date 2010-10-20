@@ -4,7 +4,7 @@
         <script type="text/javascript">
             function inline_delete(link) {
                 if (confirm("Are you sure?")) {
-                    href = link.href
+                    href = link.href;
                     django.jQuery.ajax({
                         'url': href,
                         'success': function (data) {
@@ -12,6 +12,16 @@
                         }
                     });
                 }
+                return false;
+            }
+			function ajax_function(link) {
+                href = link.href;
+                django.jQuery.ajax({
+                    'url': href,
+                    'success': function (data) {
+                        if (data == 'ok') reload_inlinetables();
+                    }
+                });
                 return false;
             }
 

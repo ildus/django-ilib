@@ -1,3 +1,4 @@
+#coding: utf-8
+
 from fields import *
 from widgets import *
-from special.dojo_foreign import *

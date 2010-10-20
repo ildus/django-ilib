@@ -131,6 +131,7 @@ def fk_listselect(request, content_type_id, field_name):
            'page_range': page_range,
            'field_name': field.name,
            'title_field': field.title_field,
+           'for_multiple': int(field.rel.multiple),
        }
     
     return render_to_response('lib/fk_select.html', context)
@@ -272,6 +273,6 @@ add_introspection_rules([
         {           # Keyword argument
         },
     ),
-], ["^lib\.fields\.special\.dojo_foreign\.ForeignKeyField"])
+], ["^lib\.fields\.popup\.foreign_key\.ForeignKeyField"])
 
 

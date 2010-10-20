@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.forms import widgets
 from tagging.utils import parse_tag_input
+from popup.foreign_key import ForeignKeyListWidget, ForeignKeyTreeWidget
 
 class MarkdownEditor(widgets.Textarea):
     

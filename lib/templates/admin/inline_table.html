@@ -85,8 +85,10 @@
             return false;
         }
     </script>
-    <a href="{{table.add_link}}" class="add-another add_link" onclick="return add_link(this);"> 
+	{% for name, url in table.add_links %}
+    <a href="{{url}}" class="add-another add_link" onclick="return add_link(this);"> 
         <img src="/media/admin/img/admin/icon_addlink.gif" width="10" height="10" alt="Добавить еще"> 
-        {% trans 'Add' %} {{table.caption_one_item}}
+        {{name}}
     </a>
+	{% endfor %}
  </div>

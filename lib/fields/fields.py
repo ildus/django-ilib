@@ -3,6 +3,8 @@
 from django.db import models
 from south.modelsinspector import add_introspection_rules
 import widgets
+from popup.foreign_key import ForeignKeyField
+from popup.mm_field import PopupManyToManyField
 
 class MarkdownTextField(models.TextField):
     def formfield(self, **kwargs):

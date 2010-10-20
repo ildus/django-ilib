@@ -1,4 +1,5 @@
 #coding: utf-8
+#author: Ildus K <i.kurbangaliev@gmail.com>
 
 from django.contrib import admin
 from django.shortcuts import render_to_response, get_object_or_404
@@ -15,6 +16,7 @@ from django.db import models
 from django.contrib.admin.views.main import ChangeList, MAX_SHOW_ALL_ALLOWED
 from django.core.paginator import Paginator, InvalidPage
 from django.utils import simplejson
+from django.utils.translation import gettext as _
 
 ''' Модель для добавления дополнительной таблицы в форму изменения какого либо объекта, показывающий связанные
     с этим объектом данные в виде таблиц, вложенные в отдельные fieldset 
@@ -46,6 +48,9 @@ class InlineTableAdmin(admin.ModelAdmin):
             'list_per_page': 10, # 0 to all
             'filter_fields': ('has_image', ),
             'no_auto_related_name': 'related_name',
+            'queryset': queryset, #queryset used for list, 'related_field' in this case not used
+            'add_links': [('name', 'url'), ('name', 'url')], #popup windows for add or change_action
+            'position_field': 'position', #if need change position action
         }),
         ...
     '''
@@ -60,6 +65,8 @@ class InlineTableAdmin(admin.ModelAdmin):
         my_urls = patterns('',
             url(r'^get_table/(\d+)/(\d+)/$', self.get_table, name = 'get_inline_table'),
             url(r'^inline_delete/(\d+)/(\d+)/$', self.inline_delete, name = 'inline_delete'),
+            url(r'^increase_position/(\w+)/(\d+)/(\d+)/$', self.increase_position, name = 'increase_position'),
+            url(r'^decrease_position/(\w+)/(\d+)/(\d+)/$', self.decrease_position, name = 'decrease_position'),
         )
         return my_urls + urls
     
@@ -152,8 +159,18 @@ class InlineTableAdmin(admin.ModelAdmin):
             
             table['reload_link'] = reverse('admin:get_inline_table', args = [inline_table_pos, edited_id])
             
-            info = model._meta.app_label, model._meta.module_name            
-            table['add_link'] = reverse('admin:%s_%s_add' % info)+'?%s=%s' % (inline_table[0], edited_id)
+            add_links = inline_table[2].get('add_links')
+            if not add_links:
+                #try:
+                    info = model._meta.app_label, model._meta.module_name
+                             
+                    url = reverse('admin:%s_%s_add' % info)+'?%s=%s' % (inline_table[0], edited_id)
+                    caption = "%s %s" % (_("Add"), model._meta.verbose_name)
+                    table['add_links'] = ((caption, url), )
+                #except:
+                #    table['add_links'] = []
+            else:
+                table['add_links'] = add_links
             
             from django.contrib.contenttypes.models import ContentType
             model_contenttype = ContentType.objects.get_for_model(model)
@@ -163,7 +180,8 @@ class InlineTableAdmin(admin.ModelAdmin):
             body_fields = inline_table[2]['body_fields']
             footer_fields = inline_table[2].get('footer_fields', None)
             filter_fields = inline_table[2].get('filter_fields', None)
-            related_name = inline_table[2].get('no_auto_related_name', None)            
+            related_name = inline_table[2].get('no_auto_related_name', None)
+            position_field = inline_table[2].get('position_field', None)         
             
             list_display_links = [body_fields[0]]
             list_per_page = inline_table[2].get('list_per_page', MAX_SHOW_ALL_ALLOWED)
@@ -192,10 +210,20 @@ class InlineTableAdmin(admin.ModelAdmin):
                         row.append(get_field_value(obj, field_name))
                         
                     #actions column
+                    actions = []
                     delete_link = reverse('admin:inline_delete', args = [model_contenttype.id, obj.id])
-                    row.append(mark_safe('<a href="%s" onclick="return inline_delete(this)">'
+                    actions.append(mark_safe('<a href="%s" onclick="return inline_delete(this)">'
                                ' <img src="/media/admin/img/admin/icon_deletelink.gif" width="10" height="10"> </a>' % (delete_link)))
                     
+                    if position_field:
+                        link = reverse('admin:increase_position', args = [position_field, model_contenttype.id, obj.id])
+                        actions.append(mark_safe('<a href="%s" onclick="return ajax_function(this)">'
+                               ' <img src="%simg/admin/arrow-down.gif" width="10" height="10"> </a>' % (link, settings.ADMIN_MEDIA_PREFIX)))
+                        
+                        link = reverse('admin:decrease_position', args = [position_field, model_contenttype.id, obj.id])
+                        actions.append(mark_safe('<a href="%s" onclick="return ajax_function(this)">'
+                               ' <img src="%simg/admin/arrow-up.gif" width="10" height="10"> </a>' % (link, settings.ADMIN_MEDIA_PREFIX)))
+                    row.append(mark_safe('&nbsp;'.join(actions)))
                     table['body'].append(row)
                 
                 if footer_fields:
@@ -215,6 +243,34 @@ class InlineTableAdmin(admin.ModelAdmin):
         except:
             return HttpResponse('fail')
         obj.delete()
+        return HttpResponse('ok')
+    
+    def increase_position(self, request, pos_field, content_type_id, object_id):
+        ''' ajax увеличение позиции '''
+        from django.contrib.contenttypes.models import ContentType
+        
+        try:
+            model = ContentType.objects.get(pk = content_type_id).model_class()
+            obj = model.objects.get(pk = object_id)
+            pos = getattr(obj, pos_field)
+            setattr(obj, pos_field, pos+1)            
+            obj.save()
+        except:
+            return HttpResponse('fail')
+        return HttpResponse('ok')
+    
+    def decrease_position(self, request, pos_field, content_type_id, object_id):
+        ''' ajax уменьшение позиции '''
+        from django.contrib.contenttypes.models import ContentType
+        
+        try:
+            model = ContentType.objects.get(pk = content_type_id).model_class()
+            obj = model.objects.get(pk = object_id)
+            pos = getattr(obj, pos_field)
+            setattr(obj, pos_field, pos-1)            
+            obj.save()
+        except:
+            return HttpResponse('fail')
         return HttpResponse('ok')
     
 class TreeChangeList(ChangeList):
