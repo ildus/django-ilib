@@ -1,18 +1,31 @@
 <div class="popup_mm_field" id="id_{{name}}">
 	{% for hidden in hiddens %}
-	<span class="popup_mm_value">
+	<span class="popup_mm_value" id="id_{{name}}_values">
 		<label>
 			<span> {{hidden.text}} </span>
 			<input type="hidden" name="{{name}}" value="{{hidden.pk}}">
 			<small class="close" title="close">x</small>
 		</label>
 	</span>
+    {% empty %}
+    <div class="empty popup_mm_value" id="id_{{name}}_values"> {{empty_text}} </div>
 	{% endfor %}
+    {% if collection %}
+        <script>
+        dojo.addOnLoad(function () {
+            dojo.query('#id_{{collection}}').onchange(function () {
+                dojo.query("#id_{{name}} .popup_mm_value").orphan();
+            });
+        });
+        </script>
+    {% endif %}
+    
 	{% if is_tree %}
 	<a onclick="return showTreeDialog(this);" 
 		id="select_id_{{name}}" class="add-another"
 		href="javascript: void(0)"
 		target="{% url fk_field_data content_type_id field_name %}"
+		collection = "{{collection}}"
 		link="{% url fk_select %}">
 			<img width="10" height="10" alt="Выбрать" src="{{ media }}lib/img/external.gif"></a>
 	{% else %}
@@ -20,6 +33,7 @@
 		id="select_id_{{name}}" class="add-another"
 		field_name="{{field_name}}"
 		href="javascript: void(0)"
+		collection = "{{collection}}"
 		link="{% url fk_listselect content_type_id field_name %}">
 			<img width="10" height="10" alt="Выбрать" src="{{ media }}lib/img/external.gif"></a>
 	{% endif %}

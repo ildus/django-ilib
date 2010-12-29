@@ -154,6 +154,8 @@ class InlineTableAdmin(admin.ModelAdmin):
                 model = inline_table[1]
                 table['caption'] = model._meta.verbose_name_plural
                 table['caption_one_item'] = model._meta.verbose_name
+                table['related_field_name'] = inline_table[0]
+                table['edited_id'] = edited_id
             except:
                 return HttpResponse('Wrong parameters')
             
@@ -161,14 +163,14 @@ class InlineTableAdmin(admin.ModelAdmin):
             
             add_links = inline_table[2].get('add_links')
             if not add_links:
-                #try:
+                try:
                     info = model._meta.app_label, model._meta.module_name
                              
-                    url = reverse('admin:%s_%s_add' % info)+'?%s=%s' % (inline_table[0], edited_id)
-                    caption = "%s %s" % (_("Add"), model._meta.verbose_name)
+                    url = reverse('admin:%s_%s_add' % info)#+'?%s=%s' % (inline_table[0], edited_id)
+                    caption = u"%s %s" % (force_unicode(_('Add')), force_unicode(model._meta.verbose_name.lower()))
                     table['add_links'] = ((caption, url), )
-                #except:
-                #    table['add_links'] = []
+                except:
+                    table['add_links'] = []
             else:
                 table['add_links'] = add_links
             

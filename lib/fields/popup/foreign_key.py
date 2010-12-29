@@ -16,6 +16,7 @@ from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.shortcuts import render_to_response, get_object_or_404
+from django.db.models.fields.related import ManyToManyRel
 
 def is_treebeard(model):
     return hasattr(model, 'get_root_nodes')
@@ -91,15 +92,20 @@ def fk_field_data(request, content_type_id, field_name, node = 'root'):
 def fk_select(request):
     return HttpResponse('<div id="treeOne"> </div>')
 
-def fk_listselect(request, content_type_id, field_name):
+def fk_listselect(request, content_type_id, field_name, collection = 0):
     try:
         page = int(request.GET.get('page', 1))
     except:
         page = 1
         
+    kwargs = {}
     model = ContentType.objects.get(pk=content_type_id).model_class()
     field = model._meta.get_field(field_name)
-    qs = field.rel.to.objects.all()
+    if hasattr(field, 'collection'):
+        if collection:
+            kwargs[field.collection_field+'__pk'] = collection
+    
+    qs = field.rel.to.objects.filter(**kwargs)
     
     char = request.GET.get('char', None)
     if field.title_field:
@@ -131,7 +137,7 @@ def fk_listselect(request, content_type_id, field_name):
            'page_range': page_range,
            'field_name': field.name,
            'title_field': field.title_field,
-           'for_multiple': int(field.rel.multiple),
+           'for_multiple': int(isinstance(field.rel, ManyToManyRel)),
        }
     
     return render_to_response('lib/fk_select.html', context)
@@ -147,7 +153,7 @@ class ForeignKeyTreeWidget(forms.Widget):
             
         if kwargs.has_key("field"):
             self.field = kwargs.pop("field")
-                
+            
         super(ForeignKeyTreeWidget,self).__init__(*args,**kwargs)
         
     def render(self, name, value,  attrs=None, choices=()):
@@ -174,6 +180,7 @@ class ForeignKeyTreeWidget(forms.Widget):
             'change_url': change_url,
             'content_type_id': self.content_type.id,
             'field_name': self.field,
+            'dialog_title': getattr(field, 'dialog_title', None),
         }
         return mark_safe(render_to_string('lib/fk_tree.html', context))
     
@@ -227,8 +234,13 @@ class ForeignKeyListWidget(forms.Widget):
             'change_url': change_url,
             'content_type_id': self.content_type.id,
             'field_name': self.field,
+            'dialog_title': getattr(field, 'dialog_title', None),
         }
-        return mark_safe(render_to_string('lib/fk_list.html', context))
+        show_simple = getattr(field, 'show_simple', False)
+        if show_simple:
+            return mark_safe(render_to_string('lib/fk_list_simple.html', context))
+        else:
+            return mark_safe(render_to_string('lib/fk_list.html', context))
     
     class Media:
         js = (
@@ -249,10 +261,15 @@ class ForeignKeyField(models.ForeignKey):
     '''
     parent_fields = None
     title_field = None
+    dialog_title = None
+    show_simple = False
     
     def __init__(self, to, to_field=None, rel_class=models.ManyToOneRel, **kwargs):
         self.parent_fields = kwargs.pop('parents') if kwargs.has_key('parents') else None
         self.title_field = kwargs.pop('title_field') if kwargs.has_key('title_field') else None
+        self.dialog_title = kwargs.pop('dialog_title') if kwargs.has_key('dialog_title') else None
+        self.show_simple = kwargs.pop('show_simple') if kwargs.has_key('show_simple') else None
+        
         super(ForeignKeyField, self).__init__(to, to_field, rel_class, **kwargs)
     
     def formfield(self, **kwargs):

@@ -37,7 +37,7 @@ def login_required(func):
             if request.is_ajax():
                 result = {'success': False, 'error': _('Authorization required')}
                 json = simplejson.dumps(result)
-                return HttpResponseForbidden(json, mimetype = 'application/json')
+                return HttpResponseForbidden(json, mimetype = 'text/plain')
             else:
                 return redirect('login_wrapper')
     

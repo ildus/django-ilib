@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.forms import widgets
 from tagging.utils import parse_tag_input
 from popup.foreign_key import ForeignKeyListWidget, ForeignKeyTreeWidget
+from django.core.urlresolvers import reverse
 
 class MarkdownEditor(widgets.Textarea):
     
@@ -95,3 +96,84 @@ class TinyMCEEditor(widgets.Textarea):
             settings.MEDIA_URL + 'lib/js/tiny_mce/jquery.tinymce.js',
             settings.MEDIA_URL + 'lib/js/richeditor_init.js',
         )
+
+class ForeignKeyRelatedWidget(widgets.Select):
+    content_type = None
+    collection = None
+    related_field = None
+    
+    def __init__(self, *args, **kwargs):
+        if kwargs.has_key("content_type"):
+            self.content_type = kwargs.pop("content_type")
+            
+        if kwargs.has_key('collection'):
+            self.collection = kwargs.pop('collection')
+            
+        if kwargs.has_key('related_field'):
+            self.related_field = kwargs.pop('related_field')            
+            
+        super(ForeignKeyRelatedWidget,self).__init__(*args,**kwargs)
+    
+    def render(self, name, value, attrs=None, choices=()):
+        if value:
+            model = self.content_type.model_class()
+            obj = model._default_manager.get(pk = value)
+            kwargs = {}
+            kwargs[self.related_field] = getattr(obj, self.related_field)
+            selectable = model._default_manager.filter(**kwargs)
+            self.choices = [(obj.pk, unicode(obj)) for obj in selectable]
+        url = reverse('fk_related_values')
+        plus = '''
+            <script>
+                dojo.addOnLoad(function () {
+                    add_related_field('%s', 'id_%s', 'id_%s', %s, '%s', %s, %s);
+                })
+            </script>
+        ''' % (url, self.collection, name, self.content_type.id, self.related_field, int(value == ''), value or 0)
+        return mark_safe(super(ForeignKeyRelatedWidget, self).render(name, value, attrs, choices)+plus)
+    
+    class Media:
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js',
+            settings.MEDIA_URL + 'lib/js/foreign/related.js',
+        )
+        
+class NiceFileWidget(widgets.FileInput):
+    def __init__(self, attrs={}):
+        super(NiceFileWidget, self).__init__(attrs)
+
+    def render(self, name, value, attrs=None):
+        output = []
+        default_attrs = {
+            'class': 'lib_nf_custom',
+        }
+        default_attrs.update(attrs)
+        standart = super(NiceFileWidget, self).render(name, value, default_attrs)
+        if value:
+            import os
+            val = os.path.basename(value.name)
+            fn = '<div class="lib_nf_filename" style="background: url(%slib/fileinput/icons.png) no-repeat 0 -96px;"> %s </div>' % (settings.MEDIA_URL, val)
+        else:
+            fn = '<div class="lib_nf_filename" style="display:none;'\
+                          ' background: url(%slib/fileinput/icons.png);"> </div>' % (settings.MEDIA_URL)
+            
+        output.append('<div class="lib_nf_wrapper">')
+        output.append(standart)
+        output.append('<div class="lib_nf_fakebutton"></div>')
+        output.append('<div class="lib_nf_blocker"></div>')
+        output.append('<div class="lib_nf_fakebutton lib_nf_activebutton"></div>')
+        output.append(fn)
+        output.append('</div>')
+            
+        print fn
+        
+        return mark_safe(u''.join(output))
+    
+    class Media:
+        js = (
+            settings.MEDIA_URL + 'lib/fileinput/input.js',
+        )
+        
+        css = {
+            'all': [settings.MEDIA_URL + 'lib/fileinput/input.css'],
+        }

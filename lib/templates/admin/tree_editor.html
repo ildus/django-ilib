@@ -16,12 +16,13 @@
     
     var tree_content_type = {% firstof tree_content_type 'null' %};
     var tree_object_id = {% firstof tree_object_id 'null' %};
+    var tree_object_id_field_name = '{% firstof tree_object_id_field_name '' %}' || 'object_id';
 
     if (tree_content_type && tree_object_id) {
         $(document).ready(function () {
             $('a.addlink').click(function (e) {
                 e.preventDefault();
-            	myAddAnotherPopup(this);
+            	myAddAnotherPopup(this, tree_object_id_field_name);
                 dismissAddAnotherPopup = function (win, newId, newRepr) {
                     win.close();
                     window.location.reload();

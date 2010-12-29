@@ -306,8 +306,9 @@ class TreeEditor(admin.ModelAdmin):
 
         extra_context = extra_context or {}
         
-        extra_context['tree_content_type'] = request.GET.get('content_type', None)
-        extra_context['tree_object_id'] = request.GET.get('object_id', None)
+        extra_context['tree_content_type'] = request.GET.get(self.content_type_field_name, None)
+        extra_context['tree_object_id'] = request.GET.get(self.object_id_field_name, None)
+        extra_context['tree_object_id_field_name'] = self.object_id_field_name
         extra_context['tree_structure'] = mark_safe(simplejson.dumps(
                                                     _build_tree_structure(self.model)))
 

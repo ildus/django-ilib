@@ -1,0 +1,16 @@
+<span>
+    {{hidden_field}}
+    
+    <a id='fk-name-{{ name }}' 
+       onclick="return showListDialog(this);" 
+       field_name="{{field_name}}"
+       data-dialog-title = "{{dialog_title}}"
+       link="{% url fk_listselect content_type_id field_name %}" href="#">
+        {% if value %} {{ value }} {% else %} выбрать {% endif %}     
+    </a>
+    {% if change_url and user.is_staff %}
+    <a onclick="return showAddAnotherPopup(this);" id="view_id_{{name}}" class="add-another" 
+        href="{{change_url}}"> 
+            <img width="16" height="16" alt="Просмотреть" src="{{ media }}lib/img/window.png"></a>
+    {% endif %}
+</span>

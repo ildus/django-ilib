@@ -69,3 +69,12 @@ div.popup_mm_field + a.add-another {
 	width: 15px;
 	margin: 10px 10px;
 }
+
+div.popup_mm_field .empty {
+    color: #666;
+    float: left;
+    font-weight: bold;
+    padding: 5px;
+    vertical-align: middle;
+    width: 50%;
+}

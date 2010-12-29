@@ -1,0 +1,29 @@
+table.inline_objects {
+    margin: 10px;
+}
+
+table.inline_objects td, table.inline_objects th {
+    padding: 5px 20px 5px 5px;
+    border: 1px solid #eee !important;
+}
+
+table.inline_objects td:last-child {
+    text-align: center;
+}
+
+div.inline_filter {
+    color: #666;
+    display: inline-block;
+    margin-left: 10px;
+    padding: 5px 0;
+}
+
+div.no_objects {
+    margin: 10px;
+}
+
+div.button_add_item a {
+    padding: 5px 10px;
+    border: 1px solid #ccc; 
+    margin-right: 10px;          
+}

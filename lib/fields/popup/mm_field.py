@@ -24,6 +24,9 @@ class MMListWidget(forms.SelectMultiple):
     content_type = None
     field = None
     is_tree = False
+    empty_text = ''
+    collection = ''
+    collection_field = ''
     
     def __init__(self, *args, **kwargs):
 
@@ -35,11 +38,19 @@ class MMListWidget(forms.SelectMultiple):
             
         if kwargs.has_key("is_tree"):
             self.is_tree = kwargs.pop("is_tree")
+            
+        if kwargs.has_key("empty_text"):
+            self.empty_text = kwargs.pop("empty_text")
+            
+        if kwargs.has_key("collection"):
+            self.collection = kwargs.pop("collection")
+            
+        if kwargs.has_key("collection_field"):
+            self.collection_field = kwargs.pop("collection_field")
                 
         super(MMListWidget,self).__init__(*args,**kwargs)
         
     def render(self, name, value,  attrs=None, choices=()):
-        final_attrs = self.build_attrs(attrs, name=name)
         field = self.content_type.model_class()._meta.get_field_by_name(self.field)[0]
         
         hiddens = []
@@ -59,6 +70,9 @@ class MMListWidget(forms.SelectMultiple):
             'field_name': self.field,
             'content_type_id': self.content_type.id,
             'is_tree': self.is_tree,
+            'empty_text': self.empty_text,
+            'collection': self.collection,
+            'collection_field': self.collection_field,
         }
         return mark_safe(render_to_string('lib/many_to_many/mm_field.html', context))
     
@@ -81,10 +95,14 @@ class PopupManyToManyField(models.ManyToManyField):
     '''
     parent_fields = None
     title_field = None
+    empty_text = ''
     
     def __init__(self, to, **kwargs):
         self.parent_fields = kwargs.pop('parents') if kwargs.has_key('parents') else None
         self.title_field = kwargs.pop('title_field') if kwargs.has_key('title_field') else None
+        self.empty_text = kwargs.pop('empty_text') if kwargs.has_key('empty_text') else ''
+        self.collection = kwargs.pop('collection') if kwargs.has_key('collection') else ''        
+        self.collection_field = kwargs.pop('collection_field') if kwargs.has_key('collection_field') else ''
         super(PopupManyToManyField, self).__init__(to, **kwargs)
         self.help_text = ''
     
@@ -93,7 +111,10 @@ class PopupManyToManyField(models.ManyToManyField):
         field = self.name
         
         is_tree = self.parent_fields or is_treebeard(self.rel.to)
-        kwargs['widget'] = MMListWidget(content_type=content_type, field=field, is_tree = is_tree)
+        kwargs['widget'] = MMListWidget(content_type=content_type, field=field, is_tree = is_tree, 
+                                        empty_text = self.empty_text,
+                                        collection = self.collection,
+                                        collection_field = self.collection_field)
         
         return super(PopupManyToManyField, self).formfield(**kwargs)
         

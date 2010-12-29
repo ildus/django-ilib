@@ -19,11 +19,11 @@ def tree_upload_path(folder):
         import datetime
         import os
         
+        fid = instance.__class__._default_manager.count() / 500 + 1
         now = datetime.datetime.now()
         ext = os.path.splitext(filename)[1]
         fn = "f%s%s%s%s%s%s"%(now.year, now.month, now.day, now.hour, now.minute, now.second)
-        return "uploads/%s/%s%s"%(folder, fn, ext)
-    
+        return "uploads/%s/%s/%s%s"%(folder, fid, fn, ext)
     return make_upload_path
 
 def is_generic_filename(filename):
@@ -34,16 +34,32 @@ def is_generic_filename(filename):
     return len(matches) > 0
 
 ''' Функция для админки, возвращающая название в виде ссылки на страницу изменения '''
-def _change_link():
+def _change_link(popup = False):
     def change_link(self):
         change_link.allow_tags = True
         
-        info = self._meta.app_label, self._meta.module_name            
+        info = self._meta.app_label, self._meta.module_name        
         link = reverse('admin:%s_%s_change' % info, args = [self.id])
         
-        return '<a href="%s"> %s </a>'%(link, unicode(self))
+        if not popup:
+            return '<a href="%s"> %s </a>'%(link, unicode(self))
+        else:
+            return '<a href="%s" class="add-another add_link" onclick="return add_link(this);"> %s </a>'%(link, unicode(self))
 
     return change_link
+
+def clear_html(stream):
+    from html5lib.html5parser import HTMLParser
+    from html5lib.sanitizer import HTMLSanitizer
+    
+    if not stream:
+        return stream
+
+    def normalize_html(stream):
+        p = HTMLParser(tokenizer=HTMLSanitizer)
+        return ''.join([token.toxml() for token in p.parseFragment(stream).childNodes])
+    
+    return normalize_html(stream)
 
 #возвращает список разбитый на страницы
 def paginate(queryset, page, count):

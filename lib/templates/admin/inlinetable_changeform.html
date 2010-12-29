@@ -19,6 +19,7 @@
                 django.jQuery.ajax({
                     'url': href,
                     'success': function (data) {
+                        console.log(data);
                         if (data == 'ok') reload_inlinetables();
                     }
                 });
@@ -61,7 +62,7 @@
                 });
             }
             
-            django.jQuery(document).ready(function () {
+            django.jQuery(function () {
                 reload_inlinetables();
             });
         </script>
