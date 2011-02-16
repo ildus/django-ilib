@@ -1,0 +1,15 @@
+{% if page_range|length > 1 %}
+<ul class="inline-paginator" query-string="{{cl.get_pagination_query_string}}">
+    {% for p in page_range %}
+        {% if p|add:'1' = page %}
+            <li>{{ p|add:'1' }}</li>
+        {% else %}
+            {% if p = '.' %}
+            <li> ... </li>
+            {% else %}
+            <li><a href="#" page="{{ p }}">{{ p|add:'1' }}</a></li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</ul>
+{% endif %}

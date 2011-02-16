@@ -18,7 +18,7 @@
     z-index: 1;
     width: 85px;
     height: 21px;
-    background: url(./button.jpg) no-repeat left top;
+    background: url(./button.png) no-repeat left top;
     float: left;
     cursor: pointer;
 }
@@ -48,7 +48,15 @@
 
 .lib_nf_activebutton
 {
-    background: url(./button_active.jpg) no-repeat left top;
+    background: url(./button_active.png) no-repeat left top;
     cursor: pointer;
     display: none;
+}
+
+.lib_nf_filename a {
+	background: url(./del.png) no-repeat 0px 1px;
+	display: inline-block;
+	height: 13px;
+	padding-left: 18px;
+	width: 13px;
 }

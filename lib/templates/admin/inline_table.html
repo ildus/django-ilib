@@ -1,4 +1,4 @@
-{% load i18n lib_tags admin_list %}
+{% load i18n lib_tags admin_list paginator_tags %}
 <h2>{{table.caption|capfirst}} </h2>
 
 <style type="text/css">
@@ -30,6 +30,26 @@
             padding: 5px 10px;
             border: 1px solid #ccc; 
             margin-right: 10px;          
+        }
+        
+        ul.inline-paginator {
+            list-style-type: none;
+            margin: 0 10px !important;
+            padding: 0 !important;
+        }
+        
+        ul.inline-paginator li {
+            display: inline-block;
+            min-width: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 0 !important;
+        }
+        
+        ul.inline-paginator li a {
+            display: block;
+            padding: 1px 3px !important;
+            height: 100%;
         }
 </style>
     
@@ -67,7 +87,8 @@
         </tr>
     </tfoot>
     {% endif %}
-    </table>
+    </table>    
+    {% admin_inline_paginator cl %}
 {% else %}
 	<div class="no_objects">
 		{% if cl.has_filters %} 

@@ -1,8 +1,9 @@
 # coding: utf-8
 
 from django.core.urlresolvers import reverse
+from django.template.defaultfilters import slugify
 
-''' Для upload_to в моделях, генерирует файл с уникальных именем.
+''' Для upload_to в моделях, генерирует файл с "уникальных" именем.
     Недостаток - все ложится в одну папку '''
 def make_upload_path(instance, filename):
     import datetime
@@ -14,21 +15,26 @@ def make_upload_path(instance, filename):
     return "uploads/%s%s"%(fn, ext)
 
 ''' Решение недостатка первой функции '''
-def tree_upload_path(folder):
+def tree_upload_path(folder, use_md5 = False):
     def make_upload_path(instance, filename):
         import datetime
         import os
         
-        fid = instance.__class__._default_manager.count() / 500 + 1
-        now = datetime.datetime.now()
         ext = os.path.splitext(filename)[1]
-        fn = "f%s%s%s%s%s%s"%(now.year, now.month, now.day, now.hour, now.minute, now.second)
+        fid = instance.__class__._default_manager.count() / 500 + 1
+        if use_md5:
+            import hashlib
+            fn = hashlib.md5(slugify(filename)).hexdigest()
+        else:            
+            now = datetime.datetime.now()            
+            fn = "f%s%s%s%s%s%s"%(now.year, now.month, now.day, now.hour, now.minute, now.second)
+        
         return "uploads/%s/%s/%s%s"%(folder, fid, fn, ext)
     return make_upload_path
 
 def is_generic_filename(filename):
     import re
-    fname_re = re.compile(r'^f[0-9]+\.', re.I)
+    fname_re = re.compile(ur'^f[0-9]+\.', re.I | re.UNICODE)
     
     matches = fname_re.findall(filename)
     return len(matches) > 0
@@ -60,6 +66,31 @@ def clear_html(stream):
         return ''.join([token.toxml() for token in p.parseFragment(stream).childNodes])
     
     return normalize_html(stream)
+
+def is_valid_image(image):
+    ''' image - UploadedFile '''
+    
+    try:
+        from PIL import Image
+    except ImportError:
+        import Image
+        
+    from cStringIO import StringIO
+    file = StringIO(image.read())
+    
+    try:
+        trial_image = Image.open(file)
+        trial_image.load()
+
+        if hasattr(file, 'reset'):
+            file.reset()
+
+        trial_image = Image.open(file)
+        trial_image.verify()
+    except Exception, err:
+        return False
+    
+    return True
 
 #возвращает список разбитый на страницы
 def paginate(queryset, page, count):

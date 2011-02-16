@@ -63,7 +63,13 @@ def generate_tree(parent, field, node, page = 1, id = 0):
                         
             result.append(obj)
     
-    searched_node, searched_pk = (node, None) if node == ROOT_NODE_NAME else node.split('_') 
+    if 'child_of_' in node:
+        _, _, searched_node, searched_pk = node.split('_') 
+        only_children = True
+    else:
+        searched_node, searched_pk = (node, None) if node == ROOT_NODE_NAME else node.split('_') 
+        only_children = False
+        
     if field.parent_fields:
         assert type(field.parent_fields) in (list, tuple)
         model = parent
@@ -78,6 +84,9 @@ def generate_tree(parent, field, node, page = 1, id = 0):
                 
     if searched_pk and result:
         result = result[0]
+        
+    if only_children:
+        result = result['children']
                 
     return result
 
@@ -126,7 +135,7 @@ def fk_listselect(request, content_type_id, field_name, collection = 0):
                         if unichr(code)!=char else '<b style="color:black;">%(char)s</b>') % {'char':unichr(code)}) for code in range(ord(u"0"),ord(u"9")+1)]
     
     from lib.utils import paginate
-    objects, paginator, page_range = paginate(qs, page, 10)
+    objects, _, page_range = paginate(qs, page, 10)
     
     context = {
            'rus': mark_safe(u"".join(rus_alphabet)),

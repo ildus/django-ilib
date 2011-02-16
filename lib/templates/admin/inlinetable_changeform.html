@@ -19,7 +19,6 @@
                 django.jQuery.ajax({
                     'url': href,
                     'success': function (data) {
-                        console.log(data);
                         if (data == 'ok') reload_inlinetables();
                     }
                 });
@@ -28,12 +27,21 @@
 
             function add_param(params, param) {
             	p = param.split('=');
-				params[p[0]] = p[1]
+				params[p[0]] = p[1];
             }
         
-            function reload_inlinetables(field_name) {
+            function reload_inlinetables(kwargs) {
                 django.jQuery('.inline_table').each(function (i, fs) {
-					var params = {}
+					var params = {};
+					if (kwargs == undefined) kwargs = {};
+					
+					var field_name = kwargs.field_name;
+					var page = kwargs.page;
+					var fieldset = kwargs.fieldset;
+					
+					if (fieldset && fieldset != fs) return false;
+					
+					url = '../get_table/'+i+'/{{object_id}}/';
 					if (field_name != undefined) {
 						s = 'select[fname="'+field_name+'"]';
 						param = django.jQuery('.inline_filter '+s+' option[selected]', fs).val();
@@ -46,24 +54,44 @@
 							else add_param(params, param);
 						}
 					}
-					url = '../get_table/'+i+'/{{object_id}}/';
-
-					query_string = '?';
+					
+					if (page != undefined) {
+						params['p'] = page;
+						query_string = kwargs.query_string;
+					}
+					else query_string = '?';
 					for (key in params) query_string += key+'='+params[key]+'&';
 					if (query_string.length > 1) url += query_string;
+					
+					var index = i;
+					django.jQuery(fs).attr('id', 'inline-table'+index);				
 
-					django.jQuery(fs).empty();
-										
                     django.jQuery(fs).load(url, function() {
+                    	if (kwargs.anchor) location.href="#inline-table"+index;
                     	django.jQuery('.inline_filter select').unbind('change').change(function () {
-                    		reload_inlinetables($(this).attr('fname'));
-                    	});                            	
+                    		var kwargs = {
+                    				field_name: django.jQuery(this).attr('fname'),
+                    				anchor: true
+                    		}
+                    		reload_inlinetables(kwargs);
+                    	});
                     });
                 });
             }
             
             django.jQuery(function () {
-                reload_inlinetables();
+                reload_inlinetables();   
+                
+                django.jQuery('.inline-paginator a').live('click', function (e) {
+                	e.preventDefault();
+                	var link = django.jQuery(this);
+                	var fs = link.parents('.inline_table').get(0);                    
+                    var page = link.attr('page')-0;
+                    var query_string = link.parents('ul:first').attr('query-string');
+                    var kwargs = {'page': page, 'fieldset': fs, 'query_string': query_string, 'anchor': true}
+                    reload_inlinetables(kwargs);
+                    return false;
+                })
             });
         </script>
     {% endif %}

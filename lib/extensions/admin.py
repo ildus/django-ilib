@@ -17,6 +17,8 @@ from django.contrib.admin.views.main import ChangeList, MAX_SHOW_ALL_ALLOWED
 from django.core.paginator import Paginator, InvalidPage
 from django.utils import simplejson
 from django.utils.translation import gettext as _
+from django.template import RequestContext
+from django.utils.http import urlencode
 
 ''' Модель для добавления дополнительной таблицы в форму изменения какого либо объекта, показывающий связанные
     с этим объектом данные в виде таблиц, вложенные в отдельные fieldset 
@@ -36,6 +38,17 @@ class InlineChangeList(ChangeList):
     def get_query_set(self):
         if self.qs is not None: self.root_query_set = self.qs
         return super(InlineChangeList, self).get_query_set()
+    
+    def get_pagination_query_string(self):
+        ''' нужно для постранички, чтобы сохранить текущие фильтры ''' 
+        p = self.params.copy()
+        if 'p' in p:
+            del p['p']
+        
+        if p:
+            return '?%s&' % urlencode(p)
+        else:
+            return '?'
 
 class InlineTableAdmin(admin.ModelAdmin):
     
@@ -179,15 +192,18 @@ class InlineTableAdmin(admin.ModelAdmin):
             
             #objects = getattr(get_object_or_404(self.model, pk = edited_id), inline_table[0]).all()
             
-            body_fields = inline_table[2]['body_fields']
-            footer_fields = inline_table[2].get('footer_fields', None)
-            filter_fields = inline_table[2].get('filter_fields', None)
-            related_name = inline_table[2].get('no_auto_related_name', None)
-            position_field = inline_table[2].get('position_field', None)         
+            parameters = inline_table[2]
+            
+            body_fields = parameters['body_fields']
+            footer_fields = parameters.get('footer_fields', None)
+            filter_fields = parameters.get('filter_fields', None)
+            related_name = parameters.get('no_auto_related_name', None)
+            position_field = parameters.get('position_field', None)
+            list_per_page = parameters.get('list_per_page', MAX_SHOW_ALL_ALLOWED)
             
             list_display_links = [body_fields[0]]
-            list_per_page = inline_table[2].get('list_per_page', MAX_SHOW_ALL_ALLOWED)
-            qs = inline_table[2].get('queryset', None)
+            
+            qs = parameters.get('queryset', None)
             if not qs:
                 related_field = model._meta.get_field(inline_table[0])
                 if not related_name:
@@ -232,8 +248,13 @@ class InlineTableAdmin(admin.ModelAdmin):
                     table['footer'] = []
                     for field_name in footer_fields:
                         table['footer'].append(get_field_value(obj, field_name))
+                        
+        ctx = {
+               'table': table,
+               'cl': cl,
+        }        
                 
-        return render_to_response('admin/inline_table.html', {'table': table, 'cl': cl})
+        return render_to_response('admin/inline_table.html', ctx, context_instance=RequestContext(request))
         
     def inline_delete(self, request, content_type_id, object_id):
         ''' ajax удаление объекта '''
