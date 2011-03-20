@@ -1,0 +1,21 @@
+{% if multilang_show %}
+<style>
+    ul.page_languages {list-style-type: none; padding: 0; margin: 10px 0;}
+    ul.page_languages li {display: inline-block; border: 1px solid #555; background-color: #fefefe; padding: 3px 10px; margin-top: 3px; font-weight: bold; }
+    ul.page_languages li a { display: block; font-weight: normal; }
+</style>
+<ul class="page_languages">
+    {% for lang_code, lang_name in languages %}
+        <li>
+            {% if original.language = lang_code %} {{lang_name}}
+            {% else %} <a href="{% url admin:multilang_get_object original.pk lang_code %}"> {{lang_name}} </a>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+<script>
+    django.jQuery(function () { if ('{{original.language}}' != '{{multilang_main_language}}') { 
+    	django.jQuery('div.{{multilang_slug_field}}').hide(); } 
+    });
+</script>
+{% endif %}

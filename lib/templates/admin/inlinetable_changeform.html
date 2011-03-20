@@ -39,7 +39,7 @@
 					var page = kwargs.page;
 					var fieldset = kwargs.fieldset;
 					
-					if (fieldset && fieldset != fs) return false;
+					if (fieldset && fieldset != fs) return;
 					
 					url = '../get_table/'+i+'/{{object_id}}/';
 					if (field_name != undefined) {
@@ -63,6 +63,7 @@
 					for (key in params) query_string += key+'='+params[key]+'&';
 					if (query_string.length > 1) url += query_string;
 					
+					console.log(url);
 					var index = i;
 					django.jQuery(fs).attr('id', 'inline-table'+index);				
 
@@ -82,7 +83,7 @@
             django.jQuery(function () {
                 reload_inlinetables();   
                 
-                django.jQuery('.inline-paginator a').live('click', function (e) {
+                django.jQuery('.inline-paginator a').live('click', function (e) {                	
                 	e.preventDefault();
                 	var link = django.jQuery(this);
                 	var fs = link.parents('.inline_table').get(0);                    

@@ -21,15 +21,14 @@ def tree_upload_path(folder, use_md5 = False):
         import os
         
         ext = os.path.splitext(filename)[1]
-        fid = instance.__class__._default_manager.count() / 500 + 1
+        now = datetime.datetime.now()
         if use_md5:
             import hashlib
             fn = hashlib.md5(slugify(filename)).hexdigest()
-        else:            
-            now = datetime.datetime.now()            
-            fn = "f%s%s%s%s%s%s"%(now.year, now.month, now.day, now.hour, now.minute, now.second)
+        else:                        
+            fn = "f%s%s%s"%(now.hour, now.minute, now.second)
         
-        return "uploads/%s/%s/%s%s"%(folder, fid, fn, ext)
+        return "uploads/%s/%s/%s/%s/%s%s"%(folder, now.year, now.month, now.day, fn, ext)
     return make_upload_path
 
 def is_generic_filename(filename):

@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import simplejson
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 
 def render_with_requestcontext(func):
     def my_render_function(request, *args, **kwargs):
