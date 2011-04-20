@@ -2,6 +2,8 @@
 
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
+from django.utils.hashcompat import md5_constructor
+from django.utils.http import urlquote
 
 ''' Для upload_to в моделях, генерирует файл с "уникальных" именем.
     Недостаток - все ложится в одну папку '''
@@ -128,4 +130,9 @@ def paginate(queryset, page, count):
             page_range.extend(range(page + 1, paginator.num_pages))
                 
     return objects, paginator, page_range
+
+def generate_cache_key(name, args):
+    args = md5_constructor(u':'.join([urlquote(arg) for arg in args]))
+    cache_key = 'generated.cache.%s.%s' % (name, args.hexdigest())
+    return cache_key
     

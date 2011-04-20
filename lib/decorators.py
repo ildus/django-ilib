@@ -3,7 +3,7 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
